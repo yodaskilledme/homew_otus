@@ -1,4 +1,4 @@
-package hw03_frequency_analysis //nolint:golint
+package hw03_frequency_analysis // nolint:golint
 
 import (
 	"testing"
@@ -59,7 +59,7 @@ func TestTop10(t *testing.T) {
 	})
 
 	t.Run("symbol string", func(t *testing.T) {
-		expected := []string{"%","&","*"}
+		expected := []string{"%", "&", "*"}
 		require.ElementsMatch(t, expected, Top10("% % * & &"))
 	})
 
