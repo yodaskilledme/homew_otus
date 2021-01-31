@@ -22,7 +22,7 @@ func (p PairList) Less(i, j int) bool {
 func (p PairList) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
-
+// just to fix travis ci cache...
 func Top10(str string) []string {
 	if str == "" {
 		return []string{}
