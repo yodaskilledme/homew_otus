@@ -16,18 +16,18 @@ type cacheItem struct {
 
 func NewCache(capacity int) Cache {
 	return &lruCache{
-		cap:   capacity,
-		queue: NewList(),
-		cacheMutex:   sync.Mutex{},
-		cache: make(map[Key]*ListItem),
+		cap:        capacity,
+		queue:      NewList(),
+		cacheMutex: sync.Mutex{},
+		cache:      make(map[Key]*ListItem),
 	}
 }
 
 type lruCache struct {
-	cap   int
-	queue List
-	cacheMutex   sync.Mutex
-	cache map[Key]*ListItem
+	cap        int
+	queue      List
+	cacheMutex sync.Mutex
+	cache      map[Key]*ListItem
 }
 
 func (l *lruCache) Set(key Key, value interface{}) bool {
