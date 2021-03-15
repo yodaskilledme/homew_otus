@@ -6,8 +6,10 @@ import (
 	"sync/atomic"
 )
 
-var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
-var ErrInvalidParameters = errors.New("invalid parameters provided")
+var (
+	ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+	ErrInvalidParameters   = errors.New("invalid parameters provided")
+)
 
 type Task func() error
 
