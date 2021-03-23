@@ -8,9 +8,6 @@ type List interface {
 	PushBack(v interface{}) *ListItem
 	Remove(elem *ListItem)
 	MoveToFront(elem *ListItem)
-	insert(elem, at *ListItem) *ListItem
-	move(elem, at *ListItem) *ListItem
-	initElem(v interface{}) *ListItem
 }
 
 type ListItem struct {
