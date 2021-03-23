@@ -28,7 +28,7 @@ func TestRunCmd(t *testing.T) {
 	})
 
 	t.Run("Exec err case", func(t *testing.T) {
-		cmd := []string{"pwd", "-KEK"}
+		cmd := []string{"pwd", "-RRR"}
 		exitCode := RunCmd(cmd, Environment{
 			"TEST_QWE": EnvVal{
 				Value: "TEST_QWE",
