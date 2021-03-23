@@ -52,14 +52,6 @@ func (l *list) insert(elem, at *ListItem) *ListItem {
 	return elem
 }
 
-func (l *list) initElem(v interface{}) *ListItem {
-	return &ListItem{
-		Value: v,
-		Next:  nil,
-		Prev:  nil,
-	}
-}
-
 func (l *list) move(elem, at *ListItem) *ListItem {
 	if elem == at {
 		return elem
