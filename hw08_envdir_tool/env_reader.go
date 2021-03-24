@@ -19,7 +19,7 @@ type EnvVal struct {
 }
 
 var (
-	ErrInvalidFileName  = errors.New("filename contains a '=' symbol")
+	ErrInvalidFileName  = errors.New("filename contains a '=' symboll")
 	ErrFileIsADirectory = errors.New("file is a directory")
 )
 
