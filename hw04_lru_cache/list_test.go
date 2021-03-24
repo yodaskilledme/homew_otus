@@ -1,4 +1,4 @@
-package hw04_lru_cache //nolint:golint,stylecheck
+package hw04_lru_cache // nolint:golint,stylecheck
 
 import (
 	"testing"
@@ -43,7 +43,7 @@ func TestList(t *testing.T) {
 		l.MoveToFront(l.Back())  // [70, 80, 60, 40, 10, 30, 50]
 
 		elems := make([]int, 0, l.Len())
-		for i := l.Front(); i != nil; i = i.Next {
+		for i := l.Front(); i.Value != nil; i = i.Next {
 			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
