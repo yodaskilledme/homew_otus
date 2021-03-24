@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -34,6 +33,7 @@ func ReadDir(dir string) (Environment, error) {
 
 	envVars := make(Environment, len(filesInfo))
 	for _, fInfo := range filesInfo {
+		fInfo.IsDir()
 		if err := validateFileInfo(fInfo); err != nil {
 			return nil, err
 		}
@@ -56,7 +56,7 @@ func ReadDir(dir string) (Environment, error) {
 	return envVars, nil
 }
 
-func validateFileInfo(fInfo fs.FileInfo) error {
+func validateFileInfo(fInfo os.FileInfo) error {
 	if fInfo.IsDir() {
 		return ErrFileIsADirectory
 	}
