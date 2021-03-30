@@ -33,7 +33,6 @@ func ReadDir(dir string) (Environment, error) {
 
 	envVars := make(Environment, len(filesInfo))
 	for _, fInfo := range filesInfo {
-		fInfo.IsDir()
 		if err := validateFileInfo(fInfo); err != nil {
 			return nil, err
 		}
