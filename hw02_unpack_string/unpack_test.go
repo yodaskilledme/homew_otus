@@ -1,4 +1,4 @@
-package hw02_unpack_string //nolint:golint,stylecheck
+package hw02_unpack_string // nolint:golint,stylecheck
 
 import (
 	"errors"
@@ -29,7 +29,7 @@ func TestUnpack(t *testing.T) {
 			input:    "aaa0b",
 			expected: "aab",
 		},
-		//uncomment if task with asterisk completed
+		// uncomment if task with asterisk completed
 		{
 			input:    `qwe\4\5`,
 			expected: `qwe45`,
