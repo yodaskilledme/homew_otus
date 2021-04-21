@@ -1,0 +1,48 @@
+version: "3.3"
+services:
+  calendar:
+    container_name: calendar
+    build:
+      context: ..
+      dockerfile: ./.docker/calendar/Dockerfile
+    restart: on-failure
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    command: -config /configs/config.yml
+    volumes:
+      - "../configs:/configs"
+    depends_on:
+      - goose
+
+  goose:
+    container_name: calendar_goose
+    build:
+      context: ..
+      dockerfile: ./.docker/goose/Dockerfile
+    restart: on-failure
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "host=calendar_postgres port=5432 user=otus password=otus dbname=calendar sslmode=disable"
+    command: -dir /migrations up
+    volumes:
+      - "../migrations:/migrations"
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: calendar_postgres
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: otus
+      POSTGRES_PASSWORD: otus
+      POSTGRES_DB: calendar
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
