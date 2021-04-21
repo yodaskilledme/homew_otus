@@ -8,8 +8,8 @@ install:
 	go mod download
 
 install-deps:
-	go get -u golang.org/x/lint/golint
-	go install golang.org/x/lint/golint
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
 lint: install-deps
 	golangci-lint run --no-config ./...
