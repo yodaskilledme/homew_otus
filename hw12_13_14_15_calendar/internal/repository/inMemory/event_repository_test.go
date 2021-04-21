@@ -101,18 +101,14 @@ func Test_Repo(t *testing.T) {
 
 	t.Run("test delete event, success", func(t *testing.T) {
 		r, ctx := prepareMocks()
-		var eventID uint64
-
-		eventID = 1
+		var eventID uint64 = 1
 		err := r.Delete(ctx, eventID)
 		require.NoError(t, err)
 	})
 
 	t.Run("test delete event, errNotFound", func(t *testing.T) {
 		r, ctx := prepareMocks()
-		var eventID uint64
-
-		eventID = 99
+		var eventID uint64 = 99
 		err := r.Delete(ctx, eventID)
 		require.Error(t, err)
 		require.Equal(t, appError.OpError("EventRepository.Delete", domain.ErrNotFound), err)
