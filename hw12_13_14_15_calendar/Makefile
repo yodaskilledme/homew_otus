@@ -9,6 +9,7 @@ install:
 
 install-deps:
 	go get -u golang.org/x/lint/golint
+	go install golang.org/x/lint/golint
 
 lint: install-deps
 	golangci-lint run --no-config ./...
