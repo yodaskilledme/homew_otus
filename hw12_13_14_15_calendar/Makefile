@@ -1,5 +1,5 @@
 build:
-	go build -o calendar cmd/calendar/main.go
+	go build -o ./bin/calendar -ldflags "$(LDFLAGS)" cmd/calendar/main.go
 
 test:
 	go test -v -count=1 -race -timeout=30s ./...

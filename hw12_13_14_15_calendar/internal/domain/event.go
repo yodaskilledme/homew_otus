@@ -10,12 +10,6 @@ var (
 	ErrNotFound = errors.New("event not found")
 )
 
-type EventID uint64
-
-type UserID uint64
-
-type UserTakenTime map[uint64]map[time.Time]struct{}
-
 type Event struct {
 	ID          uint64
 	Title       string

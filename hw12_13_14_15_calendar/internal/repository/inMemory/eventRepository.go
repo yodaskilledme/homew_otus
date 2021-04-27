@@ -48,8 +48,6 @@ func (r *Repo) Update(ctx context.Context, event domain.Event) (domain.Event, er
 	if _, ok := r.Events[event.ID]; !ok {
 		return event, appError.OpError(op, domain.ErrNotFound)
 	}
-	event.DateStart = event.DateStart.Round(time.Minute)
-	event.DateEnd = event.DateEnd.Round(time.Minute)
 	if err := r.isTimeBusy(event); err != nil {
 		return event, appError.OpError(op, err)
 	}
@@ -67,6 +65,7 @@ func (r *Repo) Delete(ctx context.Context, id uint64) error {
 	if _, ok := r.Events[id]; !ok {
 		return appError.OpError(op, domain.ErrNotFound)
 	}
+	delete(r.Events, id)
 
 	return nil
 }
@@ -86,7 +85,7 @@ func (r *Repo) List(ctx context.Context, userID uint64, dateFrom, dateTo time.Ti
 	}
 
 	if len(events) == 0 {
-		return nil, appError.OpError(op, domain.ErrNotFound)
+		return events, appError.OpError(op, domain.ErrNotFound)
 	}
 
 	return events, nil
@@ -97,7 +96,7 @@ func (r *Repo) isTimeBusy(event domain.Event) error {
 		if storedEvent.UserID != event.UserID {
 			continue
 		}
-		if (storedEvent.DateStart.Unix() < event.DateEnd.Unix()) && (storedEvent.DateEnd.Unix() > event.DateStart.Unix()) {
+		if storedEvent.DateStart.Before(event.DateEnd) && storedEvent.DateEnd.After(event.DateStart) {
 			return domain.ErrTimeBusy
 		}
 	}

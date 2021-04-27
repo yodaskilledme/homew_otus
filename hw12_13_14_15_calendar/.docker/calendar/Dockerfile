@@ -1,23 +1,20 @@
 FROM golang:1.16-alpine AS builder
-LABEL stage=builder
 
-WORKDIR /app
+WORKDIR /tmp/calendar
 
-COPY go.mod ./
-COPY go.sum ./
+COPY go.mod .
+COPY go.sum .
 
 RUN go mod download
 
 COPY . .
 
-RUN go build -o calendar cmd/calendar/main.go
+RUN go build -o ./bin/calendar -ldflags "$(LDFLAGS)" cmd/calendar/main.go
 
 FROM alpine:latest
 
-WORKDIR /app
+COPY --from=builder /tmp/calendar/bin/calendar /app/calendar
 
-COPY --from=builder /app /app
+EXPOSE 8080
 
-EXPOSE 8000
-
-ENTRYPOINT ["./calendar"]
+ENTRYPOINT ["./bin/calendar"]

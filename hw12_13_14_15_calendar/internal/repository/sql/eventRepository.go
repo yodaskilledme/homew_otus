@@ -2,7 +2,6 @@ package sql
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -23,24 +22,26 @@ func New(db *sqlx.DB) *Repo {
 func (r *Repo) Create(ctx context.Context, event domain.Event) (int, error) {
 	const (
 		op    = "EventRepository.Create"
-		query = `INSERT INTO events (title, date_start, date_end, description, user_id) values (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING RETURNING id`
+		query = `INSERT INTO events (title, date_start, date_end, description, user_id)
+SELECT ?, ?, ?, ?, ?
+    WHERE NOT exists(SELECT 1
+FROM events 
+WHERE user_id = ?
+AND date_start < ?
+AND date_end > ?)
+ON CONFLICT DO NOTHING RETURNING id;`
 	)
 	var id int
 
-	tx, err := r.db.Begin()
+	tx, err := r.db.Beginx()
 	if err != nil {
 		return -1, appError.OpError(op, err)
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
-	ok, err := r.isTimeBusy(ctx, event)
-	if err != nil {
-		return -1, appError.OpError(op, err)
-	}
-	if !ok {
-		return -1, appError.OpError(op, domain.ErrTimeBusy)
-	}
-
-	err = r.db.QueryRowContext(ctx, query, event.Title, event.DateStart, event.DateEnd, event.Description, event.UserID).Scan(&id)
+	err = tx.QueryRowContext(ctx, query, event.Title, event.DateStart, event.DateEnd, event.Description, event.UserID).Scan(&id)
 	if err != nil {
 		return -1, appError.OpError(op, err)
 	}
@@ -55,23 +56,36 @@ func (r *Repo) Create(ctx context.Context, event domain.Event) (int, error) {
 func (r *Repo) Update(ctx context.Context, event domain.Event) (domain.Event, error) {
 	const (
 		op    = "EventRepository.Update"
-		query = "UPDATE events (title, date_start, date_end, description, user_id) values (?, ?, ?, ?, ?) WHERE id = ?"
+		query = `UPDATE events (title, date_start, date_end, description, user_id) 
+VALUES (?, ?, ?, ?, ?) 
+WHERE id = ? 
+AND NOT EXISTS(
+SELECT 
+FROM events 
+WHERE user_id = ? 
+AND date_start < ?
+AND date_end > ?)`
 	)
-
-	tx, err := r.db.Begin()
+	tx, err := r.db.Beginx()
 	if err != nil {
 		return domain.Event{}, appError.OpError(op, err)
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
-	ok, err := r.isTimeBusy(ctx, event)
-	if err != nil {
-		return domain.Event{}, appError.OpError(op, err)
-	}
-	if !ok {
-		return domain.Event{}, appError.OpError(op, domain.ErrTimeBusy)
-	}
-
-	res, err := r.db.ExecContext(ctx, query, event.Title, event.DateStart, event.DateEnd, event.Description, event.UserID, event.ID)
+	res, err := tx.ExecContext(
+		ctx,
+		query,
+		event.Title,
+		event.DateStart,
+		event.DateEnd,
+		event.Description,
+		event.UserID,
+		event.ID,
+		event.UserID,
+		event.DateEnd,
+		event.DateStart)
 	if err != nil {
 		return domain.Event{}, appError.OpError(op, err)
 	}
@@ -96,12 +110,15 @@ func (r *Repo) Delete(ctx context.Context, id uint64) error {
 		query = "DELETE FROM events WHERE id = ?"
 	)
 
-	tx, err := r.db.Begin()
+	tx, err := r.db.Beginx()
 	if err != nil {
 		return appError.OpError(op, err)
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
-	res, err := r.db.ExecContext(ctx, query, id)
+	res, err := tx.ExecContext(ctx, query, id)
 	if err != nil {
 		return appError.OpError(op, err)
 	}
@@ -129,13 +146,16 @@ func (r *Repo) List(ctx context.Context, userID uint64, dateFrom, dateTo time.Ti
 			"AND user_id = ?"
 	)
 
-	tx, err := r.db.Begin()
+	tx, err := r.db.Beginx()
 	if err != nil {
 		return nil, appError.OpError(op, err)
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	var events []domain.Event
-	rows, err := r.db.QueryContext(ctx, query, userID, dateFrom, dateTo)
+	rows, err := tx.QueryContext(ctx, query, userID, dateFrom, dateTo)
 	if err != nil {
 		return nil, appError.OpError(op, err)
 	}
@@ -155,23 +175,4 @@ func (r *Repo) List(ctx context.Context, userID uint64, dateFrom, dateTo time.Ti
 	}
 
 	return events, nil
-}
-
-func (r *Repo) isTimeBusy(ctx context.Context, event domain.Event) (bool, error) {
-	const (
-		op    = "EventRepository.isTimeBusy"
-		query = `SELECT exists
-FROM events 
-WHERE user_id = ?
-AND date_start < ?
-AND date_end > ?`
-	)
-
-	var exists bool
-	err := r.db.QueryRowContext(ctx, query, event.UserID, event.DateEnd, event.DateStart).Scan(exists)
-	if err != nil && err != sql.ErrNoRows {
-		return false, appError.OpError(op, err)
-	}
-
-	return exists, nil
 }
