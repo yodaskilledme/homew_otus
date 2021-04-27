@@ -1,0 +1,26 @@
+logger:
+  level: info
+  output: stderr
+
+http:
+  host: 0.0.0.0
+  port: 8000
+
+grpc:
+  host: localhost
+  port: 50051
+
+database:
+  host: localhost
+  port: 5432
+  name: options_billing
+  user: billing
+  password: ca68e681c02ae4956cb780a7abc780bb
+
+amqp:
+  uri: amqp://guest:guest@rabbit:5672
+  queue: calendar
+
+storage:
+  type: database
+
